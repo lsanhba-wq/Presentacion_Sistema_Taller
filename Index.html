@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Propuesta de Servicios de Automatización de Gestión de Mantenimiento con IA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<style>
+:root {
+  --ink-950: #0d1117;
+  --ink-900: #161b22;
+  --ink-800: #1c2330;
+  --ink-700: #2d3748;
+  --ink-400: #6b7c93;
+  --ink-200: #b0bec9;
+  --acc:     #3b82f6;
+  --acc-glow:#60a5fa;
+  --ok:   #22c55e;
+  --warn: #f59e0b;
+  --crit: #ef4444;
+  --gold: #fbbf24;
+  --bg:       var(--ink-950);
+  --surface:  var(--ink-900);
+  --surface2: var(--ink-800);
+  --border:   rgba(255,255,255,.08);
+  --fg:       #e2e8f0;
+  --fg-dim:   var(--ink-200);
+  --fg-muted: var(--ink-400);
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--fg); min-height:100vh; }
+.mono { font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; }
+header { background:var(--surface); border-bottom:1px solid var(--border); padding:20px 32px; }
+header h1 { font-size:20px; font-weight:800; letter-spacing:-.02em; }
+header p { font-size:12px; color:var(--fg-muted); margin-top:4px; }
+.tabs { display:flex; gap:0; padding:0 32px; background:var(--surface); border-bottom:2px solid var(--border); position:sticky; top:0; z-index:10; }
+.tab { padding:16px 28px; font-size:14px; font-weight:700; letter-spacing:.02em; border:none; background:none; cursor:pointer; color:var(--fg-muted); border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .2s; }
+.tab:hover { color:var(--fg-dim); }
+.tab.active { color:var(--acc); border-bottom-color:var(--acc); }
+main { max-width:1280px; margin:0 auto; padding:32px; }
+.pane { display:none; }
+.pane.active { display:block; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:22px; margin-bottom:20px; }
+.tbl-wrap { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; font-size:12px; }
+th { text-align:left; padding:10px 12px; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--fg-muted); border-bottom:1px solid var(--border); }
+td { padding:10px 12px; border-bottom:1px solid var(--border); color:var(--fg-dim); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+@media (max-width:900px) {
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
+  main{padding:20px 16px;}
+  .tabs{padding:0 16px;}
+  .tab{padding:14px 16px; font-size:13px;}
+  header{padding:16px;}
+}
+.hero { border-radius:16px; padding:40px; margin-bottom:28px; position:relative; overflow:hidden; }
+.hero-g { background:linear-gradient(135deg,#070b14 0%,#0f1d35 60%,#0a1628 100%); border:1px solid rgba(59,130,246,.3); }
+.hero-j { background:linear-gradient(135deg,#0a1a0f 0%,#0f2a18 60%,#071812 100%); border:1px solid rgba(34,197,94,.3); }
+.hero-eyebrow { font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; margin-bottom:14px; }
+.hero h2 { font-size:30px; font-weight:800; line-height:1.2; margin-bottom:14px; }
+.hero p { font-size:15px; color:var(--fg-dim); width:100%; max-width:100%; line-height:1.7; margin-bottom:22px; }
+.hero-stats { display:flex; gap:12px; flex-wrap:wrap; }
+.hero-stat { border-radius:8px; padding:12px 20px; }
+.hero-stat .v { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; line-height:1; }
+.hero-stat .l { font-size:11px; color:var(--fg-muted); margin-top:4px; }
+.section-num { font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; margin-bottom:8px; }
+.section-title { font-size:18px; font-weight:700; margin-bottom:14px; }
+.section-desc { font-size:13px; color:var(--fg-dim); line-height:1.75; margin-bottom:18px; }
+
+/* ── GRID 2x2 DE MECANISMOS ── */
+.mec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .mec-grid { grid-template-columns: 1fr; }
+}
+.mec-card {
+  background: var(--surface2);
+  border-radius: 10px;
+  border-top: 3px solid var(--acc);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow .2s;
+}
+.mec-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+.mec-card-head { padding: 20px 20px 0; }
+.mec-card .mec-num { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+.mec-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 10px; line-height: 1.35; }
+.mec-card .mec-resumen { font-size: 12px; color: var(--fg-muted); line-height: 1.65; margin-bottom: 14px; }
+.mec-toggle {
+  width: 100%; padding: 12px 20px; border: none; background: rgba(59,130,246,.06);
+  border-top: 1px solid var(--border); color: var(--acc-glow);
+  font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  cursor: pointer; text-align: left; font-family: inherit;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background .15s;
+}
+.mec-toggle:hover { background: rgba(59,130,246,.12); }
+.mec-toggle .icon { font-size: 16px; font-weight: 400; transition: transform .25s; }
+.mec-card.expanded .mec-toggle .icon { transform: rotate(45deg); }
+.mec-detalle { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+.mec-card.expanded .mec-detalle { max-height: 2000px; }
+.mec-detalle-inner { padding: 16px 20px 20px; border-top: 1px solid var(--border); }
+.mec-bloque { margin-bottom: 14px; }
+.mec-bloque:last-child { margin-bottom: 0; }
+.mec-bloque-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+.mec-resuelve { font-size: 12px; color: var(--fg-muted); line-height: 1.7; }
+.mec-gana { list-style: none; font-size: 12px; color: var(--fg-dim); }
+.mec-gana li { padding: 5px 0 5px 20px; position: relative; line-height: 1.6; }
+.mec-gana li::before { content: '✓'; position: absolute; left: 0; color: var(--ok); font-weight: 700; }
+.mec-gana-eco { list-style: none; font-size: 12px; color: var(--fg-dim); }
+.mec-gana-eco li { padding: 5px 0 5px 20px; position: relative; line-height: 1.6; }
+.mec-gana-eco li::before { content: '💰'; position: absolute; left: 0; font-size: 11px; }
+.mec-responsabilidad { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11px; color: var(--fg-dim); line-height: 1.65; }
+.mec-responsabilidad strong { color: var(--fg); }
+
+/* ── FLUJOGRAMA DE 7 ETAPAS (S-CURVE) ── */
+.flujo-wrap {
+  padding: 12px 0;
+}
+.flujo-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  position: relative;
+}
+.flujo-row.fila-2 {
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 32px;
+  padding-left: 12.5%;
+  padding-right: 12.5%;
+}
+@media (max-width: 900px) {
+  .flujo-row, .flujo-row.fila-2 {
+    grid-template-columns: 1fr;
+    padding-left: 0; padding-right: 0;
+    margin-top: 16px;
+    gap: 14px;
+  }
+}
+.flujo-etapa {
+  position: relative;
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 20px 18px 18px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--acc);
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.flujo-etapa:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0,0,0,.35);
+}
+.flujo-etapa .etapa-icono {
+  font-size: 26px;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+.flujo-etapa .etapa-numero {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fg-muted);
+  letter-spacing: .06em;
+}
+.flujo-etapa .etapa-titulo {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--fg);
+}
+.flujo-etapa .etapa-desc {
+  font-size: 11px;
+  color: var(--fg-muted);
+  line-height: 1.65;
+}
+/* Flechas horizontales dentro de cada fila */
+.flujo-flecha {
+  position: absolute;
+  top: 50%;
+  right: -16px;
+  transform: translateY(-50%);
+  color: var(--fg-muted);
+  font-size: 18px;
+  font-weight: 400;
+  opacity: .6;
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .flujo-flecha { display: none; }
+}
+/* Bifurcación entre fila 1 y fila 2 */
+.flujo-bajada {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 8%;
+  margin: 12px 0;
+  color: var(--fg-muted);
+  font-size: 22px;
+  opacity: .5;
+}
+@media (max-width: 900px) {
+  .flujo-bajada { display: none; }
+}
+
+/* Etapas con distinto color de acento (progresión visual) */
+.flujo-etapa.e1 { border-top-color: #3b82f6; }
+.flujo-etapa.e2 { border-top-color: #4f7df5; }
+.flujo-etapa.e3 { border-top-color: #6366f1; }
+.flujo-etapa.e4 { border-top-color: #7c6aec; }
+.flujo-etapa.e5 { border-top-color: #8b5cf6; }
+.flujo-etapa.e6 { border-top-color: #22c55e; }
+.flujo-etapa.e7 { border-top-color: #16a34a; }
+
+.modalidad { background:var(--surface2); border-radius:10px; padding:22px; border-top:3px solid var(--acc); }
+.modalidad h4 { font-size:15px; font-weight:700; margin-bottom:10px; }
+.modalidad .tipo { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+.modalidad p { font-size:12px; color:var(--fg-muted); line-height:1.7; margin-bottom:14px; }
+.modalidad .comp-label { font-size:10px; font-weight:700; letter-spacing:.08em; margin-bottom:8px; }
+.modalidad ul { list-style:none; font-size:11px; color:var(--fg-muted); }
+.modalidad ul li { padding:5px 0; padding-left:14px; position:relative; line-height:1.55; }
+.modalidad ul li::before { content:'•'; position:absolute; left:0; color:var(--acc-glow); font-weight:700; }
+.modalidad .ideal { margin-top:16px; padding-top:12px; border-top:1px solid var(--border); font-size:11px; color:var(--fg-dim); }
+.cta-box { background:rgba(59,130,246,.06); border:1px solid rgba(59,130,246,.2); border-radius:12px; padding:24px; margin-top:20px; }
+.cta-box h3 { font-size:18px; font-weight:700; margin-bottom:10px; }
+.cta-box p { font-size:13px; color:var(--fg-dim); line-height:1.75; margin-bottom:16px; }
+.cta-steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+.cta-step { background:var(--surface2); border-radius:8px; padding:14px; }
+.cta-step .l { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px; }
+.cta-step .t { font-size:12px; font-weight:700; margin-bottom:6px; }
+.cta-step .d { font-size:11px; color:var(--fg-muted); line-height:1.6; }
+.diff-card { background:var(--surface2); border-radius:8px; padding:14px; }
+.diff-card h5 { font-size:12px; font-weight:700; margin-bottom:6px; }
+.diff-card p { font-size:11px; color:var(--fg-muted); line-height:1.6; }
+
+/* ── GALERÍA DE EVIDENCIA ── */
+.galeria-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:8px; }
+@media (max-width:900px){ .galeria-grid{grid-template-columns:1fr;} }
+.evidencia-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+.evidencia-card:hover { border-color: rgba(59,130,246,.35); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,.35); }
+.evidencia-card.evidencia-wide { grid-column: 1 / -1; }
+.evidencia-head { padding: 14px 18px 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.evidencia-tag { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; }
+.evidencia-tipo { font-size: 11px; color: var(--fg-muted); font-weight: 500; }
+.evidencia-img { background: linear-gradient(180deg, #f0f3f8 0%, #e8edf5 100%); padding: 16px; display: flex; align-items: center; justify-content: center; cursor: zoom-in; min-height: 260px; position: relative; overflow: hidden; }
+.evidencia-img img { display: block; width: 100%; height: auto; max-height: 340px; object-fit: contain; border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.05); transition: transform .3s; }
+.evidencia-img:hover img { transform: scale(1.015); }
+.evidencia-body { padding: 14px 18px; flex: 1; }
+.evidencia-body p { font-size: 12px; color: var(--fg-muted); line-height: 1.7; }
+.evidencia-cta { padding: 12px 18px; border-top: 1px solid var(--border); font-size: 11px; font-weight: 700; color: var(--acc-glow); text-align: center; cursor: pointer; letter-spacing: .04em; transition: background .15s; user-select: none; }
+.evidencia-cta:hover { background: rgba(59,130,246,.08); }
+
+.lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:9999; cursor:zoom-out; padding:40px; align-items:center; justify-content:center; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; }
+footer { text-align:center; padding:32px; color:var(--fg-muted); font-size:11px; border-top:1px solid var(--border); margin-top:40px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Propuesta de Servicios de Automatización de Gestión de Mantenimiento con IA</h1>
+  <p>Implementación de mecanismos inteligentes sobre su operación real · n8n + PostgreSQL + Agente IA</p>
+</header>
+
+<div class="tabs">
+  <button id="tab-gerente" class="tab active" onclick="switchTab('gerente')">🏛 Gerente / Superintendente</button>
+  <button id="tab-jefe" class="tab" onclick="switchTab('jefe')">🔧 Jefe de Taller / Área</button>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════════════════════════
+     PESTAÑA GERENTE / SUPERINTENDENTE
+══════════════════════════════════════════════════════════ -->
+<div id="pane-gerente" class="pane active">
+
+  <div class="hero hero-g">
+    <div class="hero-eyebrow" style="color:var(--acc)">Presentación Ejecutiva · Gerencia y Superintendencia</div>
+    <h2>Cuatro mecanismos inteligentes<br>para su taller de mantenimiento</h2>
+    <p>Implementamos mecanismos que automatizan los procesos críticos del ciclo de mantenimiento y asisten a su equipo mediante un Agente IA conversacional. Se instalan sobre su operación real, integrándose con su ERP/CMMS actual, sin reemplazar los sistemas que ya usa.</p>
+    <div class="hero-stats">
+      <div class="hero-stat" style="background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25)">
+        <div class="v" style="color:var(--acc)">4</div>
+        <div class="l">mecanismos funcionales</div>
+      </div>
+      <div class="hero-stat" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">
+        <div class="v" style="color:#22c55e">3</div>
+        <div class="l">modalidades de servicio</div>
+      </div>
+      <div class="hero-stat" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)">
+        <div class="v" style="color:#f59e0b">7</div>
+        <div class="l">etapas de implementación</div>
+      </div>
+      <div class="hero-stat" style="background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2)">
+        <div class="v" style="color:#a855f7">n8n</div>
+        <div class="l">plataforma base</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--crit)">
+    <div class="section-num" style="color:var(--crit)">01 · Qué problema resolvemos</div>
+    <div class="section-title">Los cuatro dolores operacionales que hoy enfrenta su taller</div>
+    <div class="grid-4">
+      <div class="diff-card">
+        <div style="font-size:22px;margin-bottom:8px">📋</div>
+        <h5>El plan se hace a mano</h5>
+        <p>Depende de la memoria del planificador, planillas Excel y revisiones manuales. Se omiten componentes, se atrasan hitos y no hay trazabilidad.</p>
+      </div>
+      <div class="diff-card">
+        <div style="font-size:22px;margin-bottom:8px">⚖️</div>
+        <h5>Priorización subjetiva</h5>
+        <p>Se atiende por orden de llegada o presión del momento, no por costo de oportunidad. Cada turno prioriza distinto.</p>
+      </div>
+      <div class="diff-card">
+        <div style="font-size:22px;margin-bottom:8px">🔍</div>
+        <h5>Información dispersa</h5>
+        <p>Estado del taller, historial, costos y KPIs viven en sistemas distintos. Cruzar fuentes toma horas que nadie tiene.</p>
+      </div>
+      <div class="diff-card">
+        <div style="font-size:22px;margin-bottom:8px">📊</div>
+        <h5>Reportes consumen tiempo</h5>
+        <p>El jefe de taller dedica horas a preparar informes. Los hitos clave se comunican por WhatsApp, sin trazabilidad.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--acc)">
+    <div class="section-num" style="color:var(--acc)">02 · Los cuatro mecanismos que entregamos</div>
+    <div class="section-title">Qué resuelve cada uno, qué gana el cliente y qué responsabilidades cubre</div>
+    <div class="section-desc">Los mecanismos son independientes entre sí. Se pueden implementar por separado o como sistema completo. Haz clic en "+ Ver detalle" para ver el alcance completo de cada uno.</div>
+
+    <div class="mec-grid">
+
+      <div class="mec-card" style="border-top-color:var(--acc)">
+        <div class="mec-card-head">
+          <div class="mec-num" style="color:var(--acc)">Mecanismo 1</div>
+          <h4>Elaboración automática del plan de mantención</h4>
+          <div class="mec-resumen">Plan preventivo sin omisiones, con trazabilidad y cumplimiento auditable.</div>
+        </div>
+        <button class="mec-toggle" onclick="toggleMec(this)">
+          <span>+ Ver detalle</span>
+          <span class="icon">+</span>
+        </button>
+        <div class="mec-detalle">
+          <div class="mec-detalle-inner">
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--crit)">QUÉ RESUELVE</div>
+              <div class="mec-resuelve">El plan preventivo hoy se arma a mano, con omisiones, sin trazabilidad de por qué cada componente entra o no, y sin visibilidad de su cumplimiento real.</div>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--ok)">QUÉ GANA · OPERACIONAL</div>
+              <ul class="mec-gana">
+                <li>Plan sin omisiones de componentes ni atrasos de hitos.</li>
+                <li>Trazabilidad de por qué cada componente entra al plan.</li>
+                <li>Cumplimiento del preventivo medible y auditable.</li>
+              </ul>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--gold)">QUÉ GANA · ECONÓMICO</div>
+              <ul class="mec-gana-eco">
+                <li>Menor costo de mantenimiento correctivo: las fallas no planificadas bajan.</li>
+                <li>Mayor disponibilidad de flota: más horas de operación efectiva.</li>
+                <li>Reducción del costo total de mantenimiento.</li>
+                <li>Menor exposición a incumplimientos de contrato o SLAs.</li>
+              </ul>
+            </div>
+            <div class="mec-responsabilidad">
+              <strong>Responsabilidades que cubre:</strong> estrategia de mantenimiento · confiabilidad de activos.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mec-card" style="border-top-color:#818cf8">
+        <div class="mec-card-head">
+          <div class="mec-num" style="color:#818cf8">Mecanismo 2</div>
+          <h4>Priorización y asignación de órdenes de trabajo</h4>
+          <div class="mec-resumen">Recursos asignados por valor, consistencia entre turnos, decisiones auditables.</div>
+        </div>
+        <button class="mec-toggle" onclick="toggleMec(this)">
+          <span>+ Ver detalle</span>
+          <span class="icon">+</span>
+        </button>
+        <div class="mec-detalle">
+          <div class="mec-detalle-inner">
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--crit)">QUÉ RESUELVE</div>
+              <div class="mec-resuelve">Las OT se atienden por orden de llegada o por presión del momento. Cada turno prioriza distinto. No hay registro de por qué se decidió atender una cosa antes que otra.</div>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--ok)">QUÉ GANA · OPERACIONAL</div>
+              <ul class="mec-gana">
+                <li>Recursos asignados a lo que genera mayor valor.</li>
+                <li>Consistencia entre turnos: misma regla, misma decisión.</li>
+                <li>Registro auditable de cada decisión.</li>
+              </ul>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--gold)">QUÉ GANA · ECONÓMICO</div>
+              <ul class="mec-gana-eco">
+                <li>Menor costo de oportunidad: recursos a los equipos que más producen.</li>
+                <li>Mayor throughput del taller sin aumentar dotación.</li>
+                <li>Reducción del backlog y menos horas extra.</li>
+                <li>Menor exposición a multas por priorización inconsistente.</li>
+              </ul>
+            </div>
+            <div class="mec-responsabilidad">
+              <strong>Responsabilidades que cubre:</strong> gestión de paradas y programación · control presupuestario OPEX/CAPEX.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mec-card" style="border-top-color:#a855f7">
+        <div class="mec-card-head">
+          <div class="mec-num" style="color:#a855f7">Mecanismo 3</div>
+          <h4>Agente IA de apoyo a decisiones</h4>
+          <div class="mec-resumen">Información inmediata en lenguaje natural, análisis What-If y KPIs bajo demanda.</div>
+        </div>
+        <button class="mec-toggle" onclick="toggleMec(this)">
+          <span>+ Ver detalle</span>
+          <span class="icon">+</span>
+        </button>
+        <div class="mec-detalle">
+          <div class="mec-detalle-inner">
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--crit)">QUÉ RESUELVE</div>
+              <div class="mec-resuelve">Responder una pregunta de negocio hoy toma horas porque implica cruzar sistemas, planillas y datos dispersos. El gerente decide con información parcial o atrasada.</div>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--ok)">QUÉ GANA · OPERACIONAL</div>
+              <ul class="mec-gana">
+                <li>Información inmediata y confiable, en lenguaje natural.</li>
+                <li>Análisis "¿qué pasa si…?" antes de decidir.</li>
+                <li>KPIs (MTBF, MTTR, disponibilidad) sin esperar cierre de mes.</li>
+                <li>Historial consultable de cada equipo y componente.</li>
+              </ul>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--gold)">QUÉ GANA · ECONÓMICO</div>
+              <ul class="mec-gana-eco">
+                <li>Menos horas gerenciales en buscar información.</li>
+                <li>Mejor calidad de decisión: datos actualizados, no estimaciones.</li>
+                <li>Menor riesgo de decisiones subóptimas.</li>
+                <li>Trazabilidad de decisiones para auditorías.</li>
+              </ul>
+            </div>
+            <div class="mec-responsabilidad">
+              <strong>Responsabilidades que cubre:</strong> confiabilidad de activos · control presupuestario · liderazgo técnico.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mec-card" style="border-top-color:#22c55e">
+        <div class="mec-card-head">
+          <div class="mec-num" style="color:#22c55e">Mecanismo 4</div>
+          <h4>Notificaciones automáticas y dashboards</h4>
+          <div class="mec-resumen">Reportes automáticos, coordinación sin WhatsApp y trazabilidad de hitos.</div>
+        </div>
+        <button class="mec-toggle" onclick="toggleMec(this)">
+          <span>+ Ver detalle</span>
+          <span class="icon">+</span>
+        </button>
+        <div class="mec-detalle">
+          <div class="mec-detalle-inner">
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--crit)">QUÉ RESUELVE</div>
+              <div class="mec-resuelve">Los informes para gerencia consumen horas del jefe de taller. Los hitos clave se comunican por WhatsApp o llamada, sin trazabilidad ni respaldo.</div>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--ok)">QUÉ GANA · OPERACIONAL</div>
+              <ul class="mec-gana">
+                <li>Reportes automáticos a gerencia sin redacción manual.</li>
+                <li>Coordinación efectiva entre mantención y operaciones.</li>
+                <li>Trazabilidad completa de los hitos del ciclo.</li>
+                <li>Dashboards multi-nivel: taller, ejecutivo, planificación, What-If.</li>
+              </ul>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--gold)">QUÉ GANA · ECONÓMICO</div>
+              <ul class="mec-gana-eco">
+                <li>Reducción de 4–8 horas semanales administrativas del jefe de taller.</li>
+                <li>Eliminación de retrabajo por descoordinación.</li>
+                <li>Menor exposición a incumplimientos de reportabilidad.</li>
+                <li>Base para decisiones de inversión con datos trazables.</li>
+              </ul>
+            </div>
+            <div class="mec-responsabilidad">
+              <strong>Responsabilidades que cubre:</strong> reportabilidad a dirección · coordinación operaciones-mantención · cumplimiento HSEQ por registro.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--acc-glow)">
+    <div class="section-num" style="color:var(--acc-glow)">03 · Los mecanismos en operación</div>
+    <div class="section-title">Evidencia visual del sistema funcionando</div>
+    <div class="section-desc">Capturas del sistema en ejecución. Cada tarjeta corresponde a un mecanismo o componente del servicio. Haz clic sobre cualquier imagen para ampliarla.</div>
+
+    <div class="galeria-grid">
+
+      <div class="evidencia-card">
+        <div class="evidencia-head">
+          <span class="evidencia-tag" style="background:rgba(59,130,246,.15);color:var(--acc-glow);border:1px solid rgba(59,130,246,.3)">Mecanismo 1</span>
+          <span class="evidencia-tipo">Elaboración automática del plan</span>
+        </div>
+        <div class="evidencia-img">
+          <img src="Imagenes/Diagrama_n8n.png" alt="Flujo del plan de mantención en n8n" onclick="abrirLightbox(this.src)">
+        </div>
+        <div class="evidencia-body">
+          <p>Flujo de trabajo en n8n que genera el plan bisemanal: verificación de simulación activa, cálculo de horas acumuladas, merge con el plan anterior, filtros de tolerancia y emisión final del plan consolidado.</p>
+        </div>
+        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
+      </div>
+
+      <div class="evidencia-card">
+        <div class="evidencia-head">
+          <span class="evidencia-tag" style="background:rgba(129,140,248,.15);color:#a5b4fc;border:1px solid rgba(129,140,248,.3)">Mecanismo 2</span>
+          <span class="evidencia-tipo">Priorización y asignación de OT</span>
+        </div>
+        <div class="evidencia-img">
+          <img src="Imagenes/Dashboard_Monitoreo_Ordenes_de_Trabajo.png" alt="Tabla de seguimiento de órdenes de trabajo" onclick="abrirLightbox(this.src)">
+        </div>
+        <div class="evidencia-body">
+          <p>Tabla de seguimiento donde cada OT aparece con su estado, elemento intervenido, nave asignada, horas planificadas y horas reales. La cola se ordena automáticamente por reglas de negocio: falla, costo de oportunidad y SPT.</p>
+        </div>
+        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
+      </div>
+
+      <div class="evidencia-card">
+        <div class="evidencia-head">
+          <span class="evidencia-tag" style="background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.3)">Mecanismo 3</span>
+          <span class="evidencia-tipo">Agente IA de apoyo a decisiones</span>
+        </div>
+        <div class="evidencia-img">
+          <img src="Imagenes/Dashboard_Indicadores_mantencion.png" alt="Indicadores de mantención: MTBF, MTTR, disponibilidad" onclick="abrirLightbox(this.src)">
+        </div>
+        <div class="evidencia-body">
+          <p>Panel de indicadores que alimenta al copiloto conversacional. Incluye evolución de MTBF por equipo, fallas por mes y datos de disponibilidad. El agente consulta estas tablas para responder en lenguaje natural.</p>
+        </div>
+        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
+      </div>
+
+      <div class="evidencia-card">
+        <div class="evidencia-head">
+          <span class="evidencia-tag" style="background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)">Mecanismo 4</span>
+          <span class="evidencia-tipo">Notificaciones automáticas</span>
+        </div>
+        <div class="evidencia-img">
+          <img src="Imagenes/NOTIFICACIONES.png" alt="Correo automático del plan bisemanal" onclick="abrirLightbox(this.src)">
+        </div>
+        <div class="evidencia-body">
+          <p>Correo emitido automáticamente al publicar el plan de mantención bisemanal. Detalla cada equipo, sus componentes afectados y la duración estimada. El mismo mecanismo notifica al recibir equipos fallados y al cierre de OT.</p>
+        </div>
+        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
+      </div>
+
+      <div class="evidencia-card evidencia-wide">
+        <div class="evidencia-head">
+          <span class="evidencia-tag" style="background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)">Vista consolidada</span>
+          <span class="evidencia-tipo">El sistema completo en operación</span>
+        </div>
+        <div class="evidencia-img">
+          <img src="Imagenes/Dashboard_Indicadores_Taller.png" alt="Indicadores del taller en tiempo real" onclick="abrirLightbox(this.src)">
+        </div>
+        <div class="evidencia-body">
+          <p>Dashboard ejecutivo con disponibilidad de flota, MTBF, MTTR, mantenimiento planificado, cumplimiento del preventivo, backlog y costo consolidado. Toda la información que antes requería consolidar manualmente, disponible en tiempo real.</p>
+        </div>
+        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--ok)">
+    <div class="section-num" style="color:var(--ok)">04 · Responsabilidades del rol cubiertas</div>
+    <div class="section-title">Qué responsabilidades formales del Gerente / Superintendente ataca cada mecanismo</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Responsabilidad formal</th><th>Cómo la cubre el sistema</th></tr></thead>
+        <tbody>
+          <tr><td>Estrategia de mantenimiento (preventivo / predictivo / correctivo)</td><td>El motor genera el plan preventivo y prioriza por costo de oportunidad, con reglas explícitas y trazables.</td></tr>
+          <tr><td>Confiabilidad de activos (MTBF / MTTR / disponibilidad)</td><td>El plan previene fallas por omisión y el agente mide y expone los KPIs en tiempo real.</td></tr>
+          <tr><td>Gestión de paradas de planta</td><td>La priorización dinámica y la asignación a naves ordenan la cola bajo restricción de capacidad.</td></tr>
+          <tr><td>Control presupuestario OPEX / CAPEX</td><td>Cada decisión deja registro de costo directo y de costo de oportunidad en CLP, auditable.</td></tr>
+          <tr><td>Gestión de contratistas y proveedores</td><td>El sistema registra hitos por contratista, notifica automáticamente y consolida cumplimiento en dashboards.</td></tr>
+          <tr><td>Inventario de repuestos críticos</td><td>El motor proyecta consumo de componentes a 2 semanas y anticipa necesidades de reposición.</td></tr>
+          <tr><td>Liderazgo y HSEC</td><td>Las notificaciones automáticas y las bitácoras digitales refuerzan el registro y la trazabilidad de cada intervención.</td></tr>
+          <tr><td>Cultura de datos y mejora continua</td><td>Todos los mecanismos dejan registro auditable; el agente permite análisis What-If sobre escenarios históricos.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid #f59e0b">
+    <div class="section-num" style="color:#f59e0b">05 · Tres modalidades de servicio</div>
+    <div class="section-title">Se adapta a la madurez tecnológica de su operación</div>
+    <div class="section-desc">Todas las modalidades incorporan los cuatro mecanismos, el Agente IA, los dashboards y las notificaciones.</div>
+
+    <div class="grid-3">
+      <div class="modalidad">
+        <div class="tipo" style="color:var(--acc)">Modalidad A</div>
+        <h4>Sistema tipo CMMS desde cero</h4>
+        <p>Construimos un sistema que modela la operación específica del cliente, incorporando los cuatro mecanismos y el Agente IA.</p>
+        <div class="comp-label" style="color:var(--acc)">COMPONENTES DEL SISTEMA</div>
+        <ul>
+          <li>Base de datos de activos</li>
+          <li>Motor de planificación</li>
+          <li>Motor de priorización y asignación</li>
+          <li>Registro de ejecución (bitácoras)</li>
+          <li>Notificaciones automáticas</li>
+          <li>Dashboards de seguimiento</li>
+          <li>Agente IA conversacional</li>
+          <li>Reportes y KPIs</li>
+        </ul>
+        <div class="ideal"><strong style="color:var(--fg)">Ideal para:</strong> empresas sin CMMS o que desean reemplazar uno obsoleto.</div>
+      </div>
+
+      <div class="modalidad" style="border-top-color:#818cf8">
+        <div class="tipo" style="color:#818cf8">Modalidad B</div>
+        <h4>Sistema de simulación complementario</h4>
+        <p>Se complementa con el CMMS existente, permitiendo probar criterios alternativos antes de aplicarlos en la operación real.</p>
+        <div class="comp-label" style="color:#818cf8">COMPONENTES DEL SISTEMA</div>
+        <ul>
+          <li>Modelo de simulación del taller</li>
+          <li>Motor de simulación de escenarios</li>
+          <li>Comparador de KPIs (simulado vs real)</li>
+          <li>Agente IA de análisis</li>
+          <li>Dashboard de escenarios</li>
+          <li>Integración con CMMS existente</li>
+        </ul>
+        <div class="ideal"><strong style="color:var(--fg)">Ideal para:</strong> empresas con CMMS que quieren evaluar mejoras sin arriesgar la operación.</div>
+      </div>
+
+      <div class="modalidad" style="border-top-color:#22c55e">
+        <div class="tipo" style="color:#22c55e">Modalidad C</div>
+        <h4>Implementación modular</h4>
+        <p>Si ya cuenta con un CMMS y solo requiere fortalecer componentes específicos, implementamos módulos individuales.</p>
+        <div class="comp-label" style="color:#22c55e">COMPONENTES IMPLEMENTABLES</div>
+        <ul>
+          <li>Motor de elaboración del plan</li>
+          <li>Motor de priorización de OT</li>
+          <li>Dashboards específicos</li>
+          <li>Agente IA con prompts validados</li>
+          <li>Sistema de notificaciones</li>
+          <li>Módulo de simulación</li>
+        </ul>
+        <div class="ideal"><strong style="color:var(--fg)">Ideal para:</strong> empresas con plataforma funcionando que quieren agregar IA sin reemplazar su sistema.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid #22c55e">
+    <div class="section-num" style="color:#22c55e">06 · Proceso de implementación</div>
+    <div class="section-title">Siete etapas estructuradas, comunes a las 3 modalidades</div>
+    <div class="section-desc">Flujo secuencial desde el diagnóstico hasta el soporte continuo. Cada etapa tiene entregables definidos y se ejecuta en orden.</div>
+
+    <div class="flujo-wrap">
+
+      <!-- Fila 1: etapas 1 a 4 -->
+      <div class="flujo-row">
+        <div class="flujo-etapa e1">
+          <div class="etapa-icono">🔍</div>
+          <div class="etapa-numero">01</div>
+          <div class="etapa-titulo">Diagnóstico</div>
+          <div class="etapa-desc">Levantamiento de la operación actual: equipos, componentes, procesos, reglas de priorización, indicadores.</div>
+          <div class="flujo-flecha">→</div>
+        </div>
+        <div class="flujo-etapa e2">
+          <div class="etapa-icono">⚙️</div>
+          <div class="etapa-numero">02</div>
+          <div class="etapa-titulo">Modelamiento</div>
+          <div class="etapa-desc">Configuración del sistema para reflejar la realidad del cliente: activos, hitos, reglas, naves.</div>
+          <div class="flujo-flecha">→</div>
+        </div>
+        <div class="flujo-etapa e3">
+          <div class="etapa-icono">🔗</div>
+          <div class="etapa-numero">03</div>
+          <div class="etapa-titulo">Integración</div>
+          <div class="etapa-desc">Conexión con sistemas existentes (ERP, CMMS previo, SCADA, IoT) si aplica.</div>
+          <div class="flujo-flecha">→</div>
+        </div>
+        <div class="flujo-etapa e4">
+          <div class="etapa-icono">📦</div>
+          <div class="etapa-numero">04</div>
+          <div class="etapa-titulo">Migración</div>
+          <div class="etapa-desc">Carga de datos históricos relevantes para alimentar el RAG del agente y calibrar el modelo.</div>
+        </div>
+      </div>
+
+      <!-- Flecha de bajada -->
+      <div class="flujo-bajada">↓</div>
+
+      <!-- Fila 2: etapas 5 a 7 (en reversa visual, pero mantiene el orden 5→6→7) -->
+      <div class="flujo-row fila-2">
+        <div class="flujo-etapa e5">
+          <div class="etapa-icono">🎓</div>
+          <div class="etapa-numero">05</div>
+          <div class="etapa-titulo">Capacitación</div>
+          <div class="etapa-desc">Formación del equipo del cliente en el uso del sistema y del Agente IA.</div>
+          <div class="flujo-flecha">→</div>
+        </div>
+        <div class="flujo-etapa e6">
+          <div class="etapa-icono">🚀</div>
+          <div class="etapa-numero">06</div>
+          <div class="etapa-titulo">Puesta en marcha</div>
+          <div class="etapa-desc">Inicio de operación con acompañamiento intensivo en las primeras semanas.</div>
+          <div class="flujo-flecha">→</div>
+        </div>
+        <div class="flujo-etapa e7">
+          <div class="etapa-icono">🛠️</div>
+          <div class="etapa-numero">07</div>
+          <div class="etapa-titulo">Soporte continuo</div>
+          <div class="etapa-desc">Actualización, monitoreo y evolución del sistema con datos nuevos del cliente.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid #a855f7">
+    <div class="section-num" style="color:#a855f7">07 · Diferenciadores y plataforma tecnológica</div>
+    <div class="section-title">Por qué esta solución es distinta a comprar un CMMS tradicional</div>
+    <div class="grid-4" style="margin-bottom:16px">
+      <div class="diff-card"><h5>Agentes IA conversacionales</h5><p>No solo dashboards: responde preguntas en lenguaje natural.</p></div>
+      <div class="diff-card"><h5>Prompts validados</h5><p>El Agente IA cuenta con prompts probados, adaptables al cliente.</p></div>
+      <div class="diff-card"><h5>Notificaciones en cada hito</h5><p>Emisión de plan, recepción de falla, término de trabajo.</p></div>
+      <div class="diff-card"><h5>Dashboards multi-nivel</h5><p>Cuatro vistas: taller, ejecutivo, planificación y What-If.</p></div>
+      <div class="diff-card"><h5>Priorización por valor</h5><p>Costo de oportunidad y SPT, no orden de llegada.</p></div>
+      <div class="diff-card"><h5>Análisis What-If</h5><p>Permite evaluar decisiones antes de aplicarlas.</p></div>
+      <div class="diff-card"><h5>Implementación a medida</h5><p>Construido desde cero para cada cliente.</p></div>
+      <div class="diff-card"><h5>Bajo costo de infraestructura</h5><p>Componentes open source y contenedores.</p></div>
+    </div>
+    <div style="background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:8px;padding:16px">
+      <div style="font-size:12px;font-weight:700;color:#a855f7;margin-bottom:10px">Plataforma base: n8n + PostgreSQL + PGVector + LLM</div>
+      <div style="font-size:12px;color:var(--fg-muted);line-height:1.75">
+        <strong style="color:var(--fg)">n8n</strong> — orquestación visual de workflows. Integración nativa con bases de datos y nodos para LLM (Gemini, Claude, OpenAI).<br><br>
+        <strong style="color:var(--fg)">PostgreSQL + PGVector</strong> — base de datos relacional y búsqueda semántica.<br><br>
+        <strong style="color:var(--fg)">LLM</strong> — Google Gemini o Anthropic Claude configurados con prompts validados.<br><br>
+        <strong style="color:var(--fg)">Hugging Face</strong> — embeddings para búsqueda semántica (opcional).
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-box">
+    <div class="section-num" style="color:var(--acc)">08 · Cómo seguir</div>
+    <h3>Diseñemos una propuesta a la medida de su operación</h3>
+    <p>Hemos construido y probado los cuatro mecanismos fundamentales de gestión inteligente de talleres. Ofrecemos tres modalidades de implementación, adaptables a la realidad y madurez de cada cliente.</p>
+    <div class="cta-steps">
+      <div class="cta-step">
+        <div class="l" style="color:var(--acc)">Paso 1</div>
+        <div class="t">Diagnóstico</div>
+        <div class="d">Taller de levantamiento de 2 horas con el Jefe de Taller y el Superintendente.</div>
+      </div>
+      <div class="cta-step">
+        <div class="l" style="color:#818cf8">Paso 2</div>
+        <div class="t">Propuesta</div>
+        <div class="d">Propuesta a medida con la modalidad recomendada y alcance definido.</div>
+      </div>
+      <div class="cta-step">
+        <div class="l" style="color:#22c55e">Paso 3</div>
+        <div class="t">Implementación</div>
+        <div class="d">Ejecución de las 7 etapas con acompañamiento en todo el proceso.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-gerente -->
+
+<!-- ══════════════════════════════════════════════════════════
+     PESTAÑA JEFE DE TALLER
+══════════════════════════════════════════════════════════ -->
+<div id="pane-jefe" class="pane">
+
+  <div class="hero hero-j">
+    <div class="hero-eyebrow" style="color:#22c55e">Presentación Operacional · Jefe de Taller y Supervisores</div>
+    <h2>El sistema que trabaja<br>con usted en el taller</h2>
+    <p>Cuatro mecanismos que automatizan el trabajo administrativo del taller y un copiloto conversacional que responde en lenguaje natural lo que usted necesita saber. <strong>No reemplaza su rol. Lo respalda.</strong></p>
+    <div class="hero-stats">
+      <div class="hero-stat" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25)">
+        <div class="v" style="color:#22c55e">Plan</div>
+        <div class="l">automático en segundos</div>
+      </div>
+      <div class="hero-stat" style="background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25)">
+        <div class="v" style="color:var(--acc)">Priorización</div>
+        <div class="l">objetiva y consistente</div>
+      </div>
+      <div class="hero-stat" style="background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2)">
+        <div class="v" style="color:#a855f7">Copiloto</div>
+        <div class="l">responde en lenguaje natural</div>
+      </div>
+      <div class="hero-stat" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)">
+        <div class="v" style="color:#f59e0b">0</div>
+        <div class="l">reportes manuales al cierre</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid #f59e0b">
+    <div class="section-num" style="color:#f59e0b">01 · El problema que resuelve en su día a día</div>
+    <div class="section-title">Usted sabe lo que pasa. El sistema hace que los datos lo respalden.</div>
+    <div class="grid-2">
+      <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:18px">
+        <div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:10px">Situación actual</div>
+        <div style="font-size:12px;color:var(--fg-muted);line-height:1.75">El plan de mantención depende de planillas, correos y memoria. Prioriza OT con información fragmentada. Preparar los informes para gerencia le quita horas que debería estar en el taller.</div>
+      </div>
+      <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:18px">
+        <div style="font-size:12px;font-weight:700;color:#4ade80;margin-bottom:10px">Con el sistema</div>
+        <div style="font-size:12px;color:var(--fg-muted);line-height:1.75">El plan se genera automáticamente. La priorización es objetiva y queda documentada. Los informes se preparan solos y usted los revisa antes de enviar. El copiloto responde sus consultas en segundos.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid #22c55e">
+    <div class="section-num" style="color:#22c55e">02 · Los cuatro mecanismos en su día a día</div>
+    <div class="section-title">Qué resuelve cada uno, qué gana usted y qué responsabilidades cubre</div>
+    <div class="section-desc">Haz clic en "+ Ver detalle" para ver el alcance completo de cada mecanismo.</div>
+
+    <div class="mec-grid">
+
+      <div class="mec-card" style="border-top-color:var(--acc)">
+        <div class="mec-card-head">
+          <div class="mec-num" style="color:var(--acc)">Mecanismo 1</div>
+          <h4>Plan de mantención automático</h4>
+          <div class="mec-resumen">Deja de armar el plan. Llega listo, con componentes agrupados y trazabilidad completa.</div>
+        </div>
+        <button class="mec-toggle" onclick="toggleMec(this)">
+          <span>+ Ver detalle</span>
+          <span class="icon">+</span>
+        </button>
+        <div class="mec-detalle">
+          <div class="mec-detalle-inner">
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--crit)">QUÉ RESUELVE</div>
+              <div class="mec-resuelve">Armar el plan bisemanal a mano, con planillas y memoria, con el riesgo de omitir componentes o atrasar hitos.</div>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--ok)">QUÉ GANA USTED</div>
+              <ul class="mec-gana">
+                <li>Deja de armar el plan. Lo recibe listo y solo lo aprueba.</li>
+                <li>Componentes que comparten ventana se agrupan en una sola OT.</li>
+                <li>Trazabilidad de cada intervención programada.</li>
+              </ul>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--gold)">QUÉ AHORRA EN TIEMPO Y ESFUERZO</div>
+              <ul class="mec-gana-eco">
+                <li>Recupera las horas dedicadas a armar el plan cada semana.</li>
+                <li>Menos reclamaciones desde operaciones por omisiones.</li>
+                <li>Menos ajustes de último minuto al plan.</li>
+              </ul>
+            </div>
+            <div class="mec-responsabilidad">
+              <strong>Responsabilidad suya que cubre:</strong> planificación y gestión de mantenimiento.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mec-card" style="border-top-color:#818cf8">
+        <div class="mec-card-head">
+          <div class="mec-num" style="color:#818cf8">Mecanismo 2</div>
+          <h4>Priorización objetiva de órdenes de trabajo</h4>
+          <div class="mec-resumen">La cola se ordena sola con reglas explícitas. Consistencia entre turnos y decisiones auditables.</div>
+        </div>
+        <button class="mec-toggle" onclick="toggleMec(this)">
+          <span>+ Ver detalle</span>
+          <span class="icon">+</span>
+        </button>
+        <div class="mec-detalle">
+          <div class="mec-detalle-inner">
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--crit)">QUÉ RESUELVE</div>
+              <div class="mec-resuelve">Decidir qué atender primero cada vez que entra una urgencia, con criterios que cambian según el turno o la presión del momento.</div>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--ok)">QUÉ GANA USTED</div>
+              <ul class="mec-gana">
+                <li>La cola se ordena sola: fallas → costo de oportunidad → SPT.</li>
+                <li>Consistencia entre turnos: la misma regla aplica siempre.</li>
+                <li>Cada decisión queda registrada y auditable.</li>
+              </ul>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--gold)">QUÉ AHORRA EN TIEMPO Y ESFUERZO</div>
+              <ul class="mec-gana-eco">
+                <li>Menos tiempo justificando por qué se atendió una OT antes que otra.</li>
+                <li>Menos conflictos con producción por priorización.</li>
+                <li>Menos backlog acumulado al cierre de la semana.</li>
+              </ul>
+            </div>
+            <div class="mec-responsabilidad">
+              <strong>Responsabilidad suya que cubre:</strong> asignación de tareas y control de indicadores.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mec-card" style="border-top-color:#a855f7">
+        <div class="mec-card-head">
+          <div class="mec-num" style="color:#a855f7">Mecanismo 3</div>
+          <h4>Copiloto conversacional</h4>
+          <div class="mec-resumen">Pregúntele al agente en lenguaje natural y responde al instante con datos reales del taller.</div>
+        </div>
+        <button class="mec-toggle" onclick="toggleMec(this)">
+          <span>+ Ver detalle</span>
+          <span class="icon">+</span>
+        </button>
+        <div class="mec-detalle">
+          <div class="mec-detalle-inner">
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--crit)">QUÉ RESUELVE</div>
+              <div class="mec-resuelve">Buscar un dato en el ERP, cruzarlo con planillas, o esperar al cierre de mes para tener un KPI consolidado.</div>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--ok)">QUÉ GANA USTED</div>
+              <ul class="mec-gana">
+                <li>Le pregunta al agente y responde al instante.</li>
+                <li>Puede preguntar "¿qué pasa si…?" antes de comprometer un cambio.</li>
+                <li>Historial de cualquier equipo disponible en segundos.</li>
+              </ul>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--gold)">QUÉ AHORRA EN TIEMPO Y ESFUERZO</div>
+              <ul class="mec-gana-eco">
+                <li>Deja de pedir datos por WhatsApp a otras áreas.</li>
+                <li>Deja de esperar reportes de fin de mes.</li>
+                <li>Menos tiempo en reuniones para aclarar el estado real.</li>
+              </ul>
+            </div>
+            <div class="mec-responsabilidad">
+              <strong>Responsabilidad suya que cubre:</strong> supervisión técnica y respuesta ante urgencias.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mec-card" style="border-top-color:#22c55e">
+        <div class="mec-card-head">
+          <div class="mec-num" style="color:#22c55e">Mecanismo 4</div>
+          <h4>Notificaciones automáticas y dashboards</h4>
+          <div class="mec-resumen">Al cierre del turno el informe ya está listo. Los hitos se notifican solos.</div>
+        </div>
+        <button class="mec-toggle" onclick="toggleMec(this)">
+          <span>+ Ver detalle</span>
+          <span class="icon">+</span>
+        </button>
+        <div class="mec-detalle">
+          <div class="mec-detalle-inner">
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--crit)">QUÉ RESUELVE</div>
+              <div class="mec-resuelve">Preparar informes al cierre del turno, coordinar por WhatsApp y no tener respaldo del estado real del taller.</div>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--ok)">QUÉ GANA USTED</div>
+              <ul class="mec-gana">
+                <li>El informe de cierre ya está listo. Solo lo revisa y firma.</li>
+                <li>El equipo ve el estado del taller en pantalla sin preguntar.</li>
+                <li>Los hitos clave (plan, falla, cierre) se notifican solos.</li>
+              </ul>
+            </div>
+            <div class="mec-bloque">
+              <div class="mec-bloque-label" style="color:var(--gold)">QUÉ AHORRA EN TIEMPO Y ESFUERZO</div>
+              <ul class="mec-gana-eco">
+                <li>Recupera 4–8 horas semanales dedicadas a preparar informes.</li>
+                <li>Deja de coordinar por WhatsApp lo que el sistema ya comunica.</li>
+                <li>Deja de reconstruir el turno anterior cuando alguien pregunta.</li>
+              </ul>
+            </div>
+            <div class="mec-responsabilidad">
+              <strong>Responsabilidad suya que cubre:</strong> control de recursos, reportes operacionales y HSEQ.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--ok)">
+    <div class="section-num" style="color:var(--ok)">03 · Responsabilidades del rol cubiertas</div>
+    <div class="section-title">Qué responsabilidades formales del Jefe de Taller ataca cada mecanismo</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Responsabilidad formal</th><th>Cómo la cubre el sistema</th></tr></thead>
+        <tbody>
+          <tr><td>Planificación y gestión de mantenimiento</td><td>El sistema entrega el plan bisemanal generado; el jefe de taller lo revisa y aprueba.</td></tr>
+          <tr><td>Órdenes de trabajo (asignar y priorizar)</td><td>La cola se ordena automáticamente por reglas explícitas (falla, costo de oportunidad, SPT).</td></tr>
+          <tr><td>Indicadores de gestión (MTBF, MTTR, disponibilidad)</td><td>Los KPIs se calculan y exponen en tiempo real; el copiloto responde consultas en lenguaje natural.</td></tr>
+          <tr><td>Supervisión técnica del equipo</td><td>El copiloto entrega contexto técnico (historial de equipos, procedimientos) para asistir la supervisión.</td></tr>
+          <tr><td>Control de inventario y repuestos</td><td>El motor proyecta consumo de componentes a partir del uso acumulado, apoyando la reposición.</td></tr>
+          <tr><td>Cumplimiento HSEQ</td><td>Las bitácoras digitales y notificaciones automáticas refuerzan el registro de cada intervención.</td></tr>
+          <tr><td>Reportabilidad al área</td><td>El informe de cierre se genera automáticamente; el jefe de taller solo lo revisa y firma.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid #ec4899">
+    <div class="section-num" style="color:#f472b6">04 · Qué ve usted en pantalla</div>
+    <div class="section-title">Interfaces pensadas para el taller, no para una sala de servidores</div>
+    <div class="section-desc">Capturas reales del sistema. Haz clic sobre cualquier imagen para ampliarla.</div>
+
+    <div class="galeria-grid">
+      <div class="evidencia-card">
+        <div class="evidencia-head">
+          <span class="evidencia-tag" style="background:rgba(59,130,246,.15);color:var(--acc-glow);border:1px solid rgba(59,130,246,.3)">Taller</span>
+          <span class="evidencia-tipo">Estado de la flota en tiempo real</span>
+        </div>
+        <div class="evidencia-img">
+          <img src="Imagenes/Dashboard_Monitoreo_Taller.png" alt="Estado de la flota en tiempo real" onclick="abrirLightbox(this.src)">
+        </div>
+        <div class="evidencia-body">
+          <p>Estado de cada nave: qué está en cola, qué está en proceso, ocupación actual y disponibilidad de flota. Información ambiental para todo el equipo, actualizada en vivo.</p>
+        </div>
+        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
+      </div>
+
+      <div class="evidencia-card">
+        <div class="evidencia-head">
+          <span class="evidencia-tag" style="background:rgba(129,140,248,.15);color:#a5b4fc;border:1px solid rgba(129,140,248,.3)">Planificación</span>
+          <span class="evidencia-tipo">Cola priorizada de OT</span>
+        </div>
+        <div class="evidencia-img">
+          <img src="Imagenes/Dashboard_Historial_Colas.png" alt="Historial de colas por prioridad" onclick="abrirLightbox(this.src)">
+        </div>
+        <div class="evidencia-body">
+          <p>Vista de planificación donde se ve la evolución de la cola a lo largo del turno, ordenada por prioridad (P0 urgencias, P1 fallas críticas, P2 preventivos por vencer, P3 dentro de ventana). Permite anticipar saturación.</p>
+        </div>
+        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
+      </div>
+
+      <div class="evidencia-card evidencia-wide">
+        <div class="evidencia-head">
+          <span class="evidencia-tag" style="background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)">Indicadores</span>
+          <span class="evidencia-tipo">KPIs del taller en tiempo real</span>
+        </div>
+        <div class="evidencia-img">
+          <img src="Imagenes/Dashboard_Indicadores_Taller.png" alt="Indicadores del taller" onclick="abrirLightbox(this.src)">
+        </div>
+        <div class="evidencia-body">
+          <p>Disponibilidad de flota, MTBF, MTTR, mantenimiento planificado, cumplimiento del preventivo, backlog y costos. Los mismos KPIs que antes se consolidaban a mano al cierre del mes, ahora disponibles en tiempo real.</p>
+        </div>
+        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--acc)">
+    <div class="section-num" style="color:var(--acc)">05 · Cómo trabaja el sistema con usted</div>
+    <div class="section-title">Su rol no cambia. Cambia la calidad de la información con que decide.</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:14px;align-items:flex-start;background:var(--surface2);border-radius:8px;padding:14px">
+        <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:rgba(59,130,246,.15);border:2px solid rgba(59,130,246,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--acc)">1</div>
+        <div><div style="font-size:13px;font-weight:700;margin-bottom:5px">El plan llega listo</div><div style="font-size:12px;color:var(--fg-muted);line-height:1.65">Usted no arma el plan. Lo recibe generado por el sistema, lo revisa, lo ajusta si es necesario, y lo aprueba.</div></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;background:var(--surface2);border-radius:8px;padding:14px">
+        <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:rgba(245,158,11,.15);border:2px solid rgba(245,158,11,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#f59e0b">2</div>
+        <div><div style="font-size:13px;font-weight:700;margin-bottom:5px">La cola se ordena sola</div><div style="font-size:12px;color:var(--fg-muted);line-height:1.65">La priorización no depende de usted para ser consistente. El sistema aplica las reglas de negocio siempre igual.</div></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;background:var(--surface2);border-radius:8px;padding:14px">
+        <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:rgba(168,85,247,.15);border:2px solid rgba(168,85,247,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#a855f7">3</div>
+        <div><div style="font-size:13px;font-weight:700;margin-bottom:5px">Pregunta y el agente responde</div><div style="font-size:12px;color:var(--fg-muted);line-height:1.65">Cuando necesita un dato, no busca en SAP. Le pregunta al copiloto. Respuesta inmediata con datos del taller.</div></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;background:var(--surface2);border-radius:8px;padding:14px">
+        <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:rgba(34,197,94,.15);border:2px solid rgba(34,197,94,.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#22c55e">4</div>
+        <div><div style="font-size:13px;font-weight:700;margin-bottom:5px">Reporte al cierre, listo</div><div style="font-size:12px;color:var(--fg-muted);line-height:1.65">Al terminar el turno el informe ya está preparado. Usted lo revisa, lo ajusta si hace falta y lo envía.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--ok)">
+    <div class="section-num" style="color:var(--ok)">06 · Lo que no cambia en su taller</div>
+    <div class="section-title">Se instala encima. No reemplaza lo que ya funciona.</div>
+    <div class="grid-3">
+      <div class="diff-card">
+        <h5>Su sistema de registro de OT actual</h5>
+        <p>Se mantiene. El sistema de orquestación lee lo que ya existe y agrega inteligencia encima.</p>
+      </div>
+      <div class="diff-card">
+        <h5>Sus mecánicos y técnicos</h5>
+        <p>No cambian su forma de trabajar. Solo el jefe de taller, planificadores y supervisores usan las nuevas interfaces.</p>
+      </div>
+      <div class="diff-card">
+        <h5>Sus criterios operacionales</h5>
+        <p>Las reglas de priorización las definimos juntos en la etapa de modelamiento. No imponemos criterios: los formalizamos.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-box" style="background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)">
+    <div class="section-num" style="color:#22c55e">07 · Cómo seguir</div>
+    <h3>Conversemos sobre su taller</h3>
+    <p>Agendamos 2 horas de taller de levantamiento donde usted nos cuenta cómo opera hoy, qué le duele y qué esperaría de un sistema. Sin compromiso. Sin acceso a sistemas.</p>
+    <div class="cta-steps">
+      <div class="cta-step">
+        <div class="l" style="color:#22c55e">Paso 1</div>
+        <div class="t">Conversación inicial</div>
+        <div class="d">2 horas de taller con el Jefe de Taller y el Superintendente.</div>
+      </div>
+      <div class="cta-step">
+        <div class="l" style="color:#22c55e">Paso 2</div>
+        <div class="t">Documento de diagnóstico</div>
+        <div class="d">Le entregamos un resumen firmado con los hallazgos del taller.</div>
+      </div>
+      <div class="cta-step">
+        <div class="l" style="color:#22c55e">Paso 3</div>
+        <div class="t">Propuesta conjunta</div>
+        <div class="d">Diseñamos la propuesta con sus criterios y prioridades reales.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pane-jefe -->
+
+</main>
+
+<footer>
+  Propuesta de Servicios de Automatización de Gestión de Mantenimiento con IA · Documento confidencial
+</footer>
+
+<div class="lightbox" id="lightbox" onclick="cerrarLightbox()">
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<script>
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('pane-'+tab).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function toggleMec(btn){
+  const card = btn.closest('.mec-card');
+  card.classList.toggle('expanded');
+  btn.querySelector('span:first-child').textContent = card.classList.contains('expanded') ? '− Ocultar' : '+ Ver detalle';
+}
+function abrirLightbox(src){
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function cerrarLightbox(){
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') cerrarLightbox(); });
+</script>
+
+</body>
+</html>
