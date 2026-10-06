@@ -240,29 +240,118 @@ tr:last-child td { border-bottom:none; }
 .diff-card h5 { font-size:12px; font-weight:700; margin-bottom:6px; }
 .diff-card p { font-size:11px; color:var(--fg-muted); line-height:1.6; }
 
-/* ── GALERÍA ── */
-.galeria-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:8px; }
-@media (max-width:900px){ .galeria-grid{grid-template-columns:1fr;} }
-.evidencia-card {
+/* ── CARRUSEL ── */
+.carrusel-wrap { position: relative; margin-top: 8px; }
+.carrusel {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 4px 4px 20px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.carrusel::-webkit-scrollbar { display: none; }
+.carrusel-item {
+  flex: 0 0 88%;
+  max-width: 720px;
+  scroll-snap-align: center;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  display: flex; flex-direction: column;
-  transition: transform .2s, border-color .2s, box-shadow .2s;
+  transition: transform .3s, box-shadow .3s, border-color .3s;
+  animation: fadeUpCarrusel .6s ease both;
 }
-.evidencia-card:hover { border-color: rgba(59,130,246,.35); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,.35); }
-.evidencia-card.evidencia-wide { grid-column: 1 / -1; }
-.evidencia-head { padding: 14px 18px 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-.evidencia-tag { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; }
-.evidencia-tipo { font-size: 11px; color: var(--fg-muted); font-weight: 500; }
-.evidencia-img { background: linear-gradient(180deg, #f0f3f8 0%, #e8edf5 100%); padding: 16px; display: flex; align-items: center; justify-content: center; cursor: zoom-in; min-height: 260px; position: relative; overflow: hidden; }
-.evidencia-img img { display: block; width: 100%; height: auto; max-height: 340px; object-fit: contain; border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.05); transition: transform .3s; }
-.evidencia-img:hover img { transform: scale(1.015); }
-.evidencia-body { padding: 14px 18px; flex: 1; }
-.evidencia-body p { font-size: 12px; color: var(--fg-muted); line-height: 1.7; }
-.evidencia-cta { padding: 12px 18px; border-top: 1px solid var(--border); font-size: 11px; font-weight: 700; color: var(--acc-glow); text-align: center; cursor: pointer; letter-spacing: .04em; transition: background .15s; user-select: none; }
-.evidencia-cta:hover { background: rgba(59,130,246,.08); }
+@media (min-width: 1000px) { .carrusel-item { flex: 0 0 60%; } }
+@media (max-width: 600px) { .carrusel-item { flex: 0 0 92%; } }
+.carrusel-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59,130,246,.4);
+  box-shadow: 0 16px 40px rgba(0,0,0,.45);
+}
+.carrusel-img-wrap {
+  position: relative;
+  background: linear-gradient(135deg, #e8edf5 0%, #d4dae5 100%);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-in;
+  min-height: 280px;
+  overflow: hidden;
+}
+.carrusel-img-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.3), 0 0 0 1px rgba(0,0,0,.06);
+  transition: transform .4s ease;
+}
+.carrusel-item:hover .carrusel-img-wrap img { transform: scale(1.03); }
+.carrusel-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #fff;
+  backdrop-filter: blur(8px);
+  z-index: 2;
+}
+.carrusel-body { padding: 18px 22px 22px; }
+.carrusel-titulo { font-size: 15px; font-weight: 700; color: var(--fg); margin-bottom: 8px; }
+.carrusel-desc { font-size: 12px; color: var(--fg-muted); line-height: 1.7; }
+.carrusel-nav {
+  position: absolute;
+  top: 40%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(20,25,35,.85);
+  color: var(--fg);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, transform .2s;
+  backdrop-filter: blur(8px);
+  user-select: none;
+  line-height: 1;
+  padding-bottom: 4px;
+}
+.carrusel-nav:hover { background: rgba(59,130,246,.35); }
+.carrusel-nav:active { transform: translateY(-50%) scale(.92); }
+.carrusel-prev { left: -8px; }
+.carrusel-next { right: -8px; }
+@media (max-width: 700px) { .carrusel-nav { display: none; } }
+.carrusel-dots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
+.carrusel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background .2s, transform .2s;
+  cursor: pointer;
+}
+.carrusel-dot.active { background: var(--acc); transform: scale(1.3); }
+@keyframes fadeUpCarrusel {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 .lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:9999; cursor:zoom-out; padding:40px; align-items:center; justify-content:center; }
 .lightbox.active { display:flex; }
@@ -274,7 +363,7 @@ footer { text-align:center; padding:32px; color:var(--fg-muted); font-size:11px;
 
 <header>
   <h1>Propuesta de Servicios de Automatización de Gestión de Mantenimiento con IA</h1>
-  <p>Implementación de mecanismos inteligentes sobre su operación real · sin dependencia tecnológica específica</p>
+  <p>Implementación de mecanismos inteligentes sobre su operación real</p>
 </header>
 
 <div class="tabs">
@@ -525,80 +614,94 @@ footer { text-align:center; padding:32px; color:var(--fg-muted); font-size:11px;
   <div class="card" style="border-left:4px solid var(--acc-glow)">
     <div class="section-num" style="color:var(--acc-glow)">03 · Los mecanismos en operación</div>
     <div class="section-title">Evidencia visual del sistema funcionando</div>
-    <div class="section-desc">Capturas del sistema en ejecución. Cada tarjeta corresponde a un mecanismo o componente del servicio. Haz clic sobre cualquier imagen para ampliarla.</div>
+    <div class="section-desc">Desliza horizontalmente para recorrer las capturas. Toca cualquier imagen para ampliarla.</div>
 
-    <div class="galeria-grid">
+    <div class="carrusel-wrap">
+      <button class="carrusel-nav carrusel-prev" onclick="scrollCarrusel(-1)" aria-label="Anterior">‹</button>
+      <button class="carrusel-nav carrusel-next" onclick="scrollCarrusel(1)" aria-label="Siguiente">›</button>
 
-      <div class="evidencia-card">
-        <div class="evidencia-head">
-          <span class="evidencia-tag" style="background:rgba(59,130,246,.15);color:var(--acc-glow);border:1px solid rgba(59,130,246,.3)">Mecanismo 1</span>
-          <span class="evidencia-tipo">Elaboración automática del plan</span>
+      <div class="carrusel" id="carrusel">
+
+        <div class="carrusel-item">
+          <div class="carrusel-img-wrap">
+            <img src="Imagenes/Diagrama_n8n.png" alt="Flujo del plan de mantención" onclick="abrirLightbox(this.src)">
+            <div class="carrusel-tag" style="background:rgba(59,130,246,.85)">Mecanismo 1</div>
+          </div>
+          <div class="carrusel-body">
+            <div class="carrusel-titulo">Elaboración automática del plan</div>
+            <div class="carrusel-desc">Flujo de trabajo que genera el plan de mantención: verificación, cálculo de horas acumuladas, merge con el plan anterior, filtros de tolerancia y emisión final.</div>
+          </div>
         </div>
-        <div class="evidencia-img">
-          <img src="Imagenes/Diagrama_n8n.png" alt="Flujo del plan de mantención" onclick="abrirLightbox(this.src)">
+
+        <div class="carrusel-item">
+          <div class="carrusel-img-wrap">
+            <img src="Imagenes/Dashboard_Monitoreo_Ordenes_de_Trabajo.png" alt="Tabla de seguimiento de OT" onclick="abrirLightbox(this.src)">
+            <div class="carrusel-tag" style="background:rgba(129,140,248,.85)">Mecanismo 2</div>
+          </div>
+          <div class="carrusel-body">
+            <div class="carrusel-titulo">Priorización y asignación de OT</div>
+            <div class="carrusel-desc">Cada OT con su estado, elemento intervenido, bahía asignada, horas planificadas y reales. La cola se ordena por reglas de negocio.</div>
+          </div>
         </div>
-        <div class="evidencia-body">
-          <p>Flujo de trabajo que genera el plan de mantención: verificación de simulación activa, cálculo de horas acumuladas, merge con el plan anterior, filtros de tolerancia y emisión final del plan consolidado.</p>
+
+        <div class="carrusel-item">
+          <div class="carrusel-img-wrap">
+            <img src="Imagenes/Dashboard_Indicadores_mantencion.png" alt="Indicadores de mantención" onclick="abrirLightbox(this.src)">
+            <div class="carrusel-tag" style="background:rgba(168,85,247,.85)">Mecanismo 3</div>
+          </div>
+          <div class="carrusel-body">
+            <div class="carrusel-titulo">Agente IA de apoyo a decisiones</div>
+            <div class="carrusel-desc">Panel de indicadores que alimenta al copiloto: evolución de MTBF por equipo, fallas por mes y disponibilidad en tiempo real.</div>
+          </div>
         </div>
-        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
+
+        <div class="carrusel-item">
+          <div class="carrusel-img-wrap">
+            <img src="Imagenes/NOTIFICACIONES.png" alt="Correo automático del plan" onclick="abrirLightbox(this.src)">
+            <div class="carrusel-tag" style="background:rgba(34,197,94,.85)">Mecanismo 4</div>
+          </div>
+          <div class="carrusel-body">
+            <div class="carrusel-titulo">Notificaciones automáticas</div>
+            <div class="carrusel-desc">Correo emitido al publicar el plan. Detalla equipos, componentes afectados y duración estimada. Notifica también en fallas y cierres.</div>
+          </div>
+        </div>
+
+        <div class="carrusel-item">
+          <div class="carrusel-img-wrap">
+            <img src="Imagenes/Dashboard_Indicadores_Taller.png" alt="Indicadores del taller" onclick="abrirLightbox(this.src)">
+            <div class="carrusel-tag" style="background:rgba(245,158,11,.85)">Vista consolidada</div>
+          </div>
+          <div class="carrusel-body">
+            <div class="carrusel-titulo">El sistema completo en operación</div>
+            <div class="carrusel-desc">Dashboard ejecutivo con disponibilidad, MTBF, MTTR, cumplimiento del preventivo, backlog y costos consolidados en tiempo real.</div>
+          </div>
+        </div>
+
+        <div class="carrusel-item">
+          <div class="carrusel-img-wrap">
+            <img src="Imagenes/Dashboard_Monitoreo_Taller.png" alt="Estado de la flota" onclick="abrirLightbox(this.src)">
+            <div class="carrusel-tag" style="background:rgba(59,130,246,.85)">Taller</div>
+          </div>
+          <div class="carrusel-body">
+            <div class="carrusel-titulo">Estado de bahías en tiempo real</div>
+            <div class="carrusel-desc">Qué está en cola, qué está en proceso, ocupación de cada bahía y disponibilidad de equipos. Actualizado en vivo.</div>
+          </div>
+        </div>
+
+        <div class="carrusel-item">
+          <div class="carrusel-img-wrap">
+            <img src="Imagenes/Dashboard_Historial_Colas.png" alt="Historial de colas" onclick="abrirLightbox(this.src)">
+            <div class="carrusel-tag" style="background:rgba(129,140,248,.85)">Planificación</div>
+          </div>
+          <div class="carrusel-body">
+            <div class="carrusel-titulo">Cola priorizada de OT</div>
+            <div class="carrusel-desc">Evolución de la cola a lo largo del turno, ordenada por prioridad. Permite anticipar saturación antes de que ocurra.</div>
+          </div>
+        </div>
+
       </div>
 
-      <div class="evidencia-card">
-        <div class="evidencia-head">
-          <span class="evidencia-tag" style="background:rgba(129,140,248,.15);color:#a5b4fc;border:1px solid rgba(129,140,248,.3)">Mecanismo 2</span>
-          <span class="evidencia-tipo">Priorización y asignación de OT</span>
-        </div>
-        <div class="evidencia-img">
-          <img src="Imagenes/Dashboard_Monitoreo_Ordenes_de_Trabajo.png" alt="Tabla de seguimiento de órdenes de trabajo" onclick="abrirLightbox(this.src)">
-        </div>
-        <div class="evidencia-body">
-          <p>Tabla de seguimiento donde cada OT aparece con su estado, elemento intervenido, bahía asignada, horas planificadas y horas reales. La cola se ordena automáticamente por reglas de negocio: falla, costo de oportunidad y duración.</p>
-        </div>
-        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
-      </div>
-
-      <div class="evidencia-card">
-        <div class="evidencia-head">
-          <span class="evidencia-tag" style="background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.3)">Mecanismo 3</span>
-          <span class="evidencia-tipo">Agente IA de apoyo a decisiones</span>
-        </div>
-        <div class="evidencia-img">
-          <img src="Imagenes/Dashboard_Indicadores_mantencion.png" alt="Indicadores de mantención: MTBF, MTTR, disponibilidad" onclick="abrirLightbox(this.src)">
-        </div>
-        <div class="evidencia-body">
-          <p>Panel de indicadores que alimenta al copiloto conversacional. Incluye evolución de MTBF por equipo, fallas por mes y datos de disponibilidad. El agente consulta estas tablas para responder en lenguaje natural.</p>
-        </div>
-        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
-      </div>
-
-      <div class="evidencia-card">
-        <div class="evidencia-head">
-          <span class="evidencia-tag" style="background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)">Mecanismo 4</span>
-          <span class="evidencia-tipo">Notificaciones automáticas</span>
-        </div>
-        <div class="evidencia-img">
-          <img src="Imagenes/NOTIFICACIONES.png" alt="Correo automático del plan de mantención" onclick="abrirLightbox(this.src)">
-        </div>
-        <div class="evidencia-body">
-          <p>Correo emitido automáticamente al publicar el plan de mantención. Detalla cada equipo, sus componentes afectados y la duración estimada. El mismo mecanismo notifica al recibir equipos fallados y al cierre de OT.</p>
-        </div>
-        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
-      </div>
-
-      <div class="evidencia-card evidencia-wide">
-        <div class="evidencia-head">
-          <span class="evidencia-tag" style="background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)">Vista consolidada</span>
-          <span class="evidencia-tipo">El sistema completo en operación</span>
-        </div>
-        <div class="evidencia-img">
-          <img src="Imagenes/Dashboard_Indicadores_Taller.png" alt="Indicadores del taller en tiempo real" onclick="abrirLightbox(this.src)">
-        </div>
-        <div class="evidencia-body">
-          <p>Dashboard ejecutivo con disponibilidad de equipos, MTBF, MTTR, mantenimiento planificado, cumplimiento del preventivo, backlog y costo consolidado. Toda la información que antes requería consolidar manualmente, disponible en tiempo real.</p>
-        </div>
-        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
-      </div>
-
+      <div class="carrusel-dots" id="carruselDots"></div>
     </div>
   </div>
 
@@ -746,8 +849,7 @@ footer { text-align:center; padding:32px; color:var(--fg-muted); font-size:11px;
         <strong style="color:var(--fg)">Orquestación visual de workflows (low-code)</strong> — modela procesos complejos sin desarrollo extensivo de código, integrando fuentes de datos y reglas de negocio.<br><br>
         <strong style="color:var(--fg)">Base de datos relacional + búsqueda semántica</strong> — persistencia robusta y recuperación inteligente de información histórica y documental.<br><br>
         <strong style="color:var(--fg)">Modelos de lenguaje de última generación (LLM)</strong> — para el agente IA conversacional, configurados con prompts validados y operación controlada.<br><br>
-        <strong style="color:var(--fg)">Embeddings para búsqueda semántica</strong> — recuperación de casos históricos y documentación técnica del activo.<br><br>
-        
+        <strong style="color:var(--fg)">Embeddings para búsqueda semántica</strong> — recuperación de casos históricos y documentación técnica del activo.
       </div>
     </div>
   </div>
@@ -1000,50 +1102,61 @@ footer { text-align:center; padding:32px; color:var(--fg-muted); font-size:11px;
   <div class="card" style="border-left:4px solid #ec4899">
     <div class="section-num" style="color:#f472b6">03 · Qué ve usted en pantalla</div>
     <div class="section-title">Interfaces pensadas para el taller, no para una sala de servidores</div>
-    <div class="section-desc">Capturas reales del sistema. Haz clic sobre cualquier imagen para ampliarla.</div>
+    <div class="section-desc">Desliza horizontalmente para recorrer las capturas. Toca cualquier imagen para ampliarla.</div>
 
-    <div class="galeria-grid">
-      <div class="evidencia-card">
-        <div class="evidencia-head">
-          <span class="evidencia-tag" style="background:rgba(59,130,246,.15);color:var(--acc-glow);border:1px solid rgba(59,130,246,.3)">Taller</span>
-          <span class="evidencia-tipo">Estado de los equipos en tiempo real</span>
+    <div class="carrusel-wrap">
+      <button class="carrusel-nav carrusel-prev" onclick="scrollCarrusel(-1)" aria-label="Anterior">‹</button>
+      <button class="carrusel-nav carrusel-next" onclick="scrollCarrusel(1)" aria-label="Siguiente">›</button>
+
+      <div class="carrusel" id="carrusel-jefe">
+
+        <div class="carrusel-item">
+          <div class="carrusel-img-wrap">
+            <img src="Imagenes/Dashboard_Monitoreo_Taller.png" alt="Estado de los equipos" onclick="abrirLightbox(this.src)">
+            <div class="carrusel-tag" style="background:rgba(59,130,246,.85)">Taller</div>
+          </div>
+          <div class="carrusel-body">
+            <div class="carrusel-titulo">Estado de bahías en tiempo real</div>
+            <div class="carrusel-desc">Qué está en cola, qué está en proceso, ocupación de cada bahía y disponibilidad de equipos. Actualizado en vivo.</div>
+          </div>
         </div>
-        <div class="evidencia-img">
-          <img src="Imagenes/Dashboard_Monitoreo_Taller.png" alt="Estado de los equipos en tiempo real" onclick="abrirLightbox(this.src)">
+
+        <div class="carrusel-item">
+          <div class="carrusel-img-wrap">
+            <img src="Imagenes/Dashboard_Historial_Colas.png" alt="Historial de colas" onclick="abrirLightbox(this.src)">
+            <div class="carrusel-tag" style="background:rgba(129,140,248,.85)">Planificación</div>
+          </div>
+          <div class="carrusel-body">
+            <div class="carrusel-titulo">Cola priorizada de OT</div>
+            <div class="carrusel-desc">Evolución de la cola a lo largo del turno, ordenada por prioridad. Permite anticipar saturación antes de que ocurra.</div>
+          </div>
         </div>
-        <div class="evidencia-body">
-          <p>Estado de cada bahía: qué está en cola, qué está en proceso, ocupación actual y disponibilidad de equipos. Información ambiental para todo el equipo, actualizada en vivo.</p>
+
+        <div class="carrusel-item">
+          <div class="carrusel-img-wrap">
+            <img src="Imagenes/Dashboard_Indicadores_Taller.png" alt="Indicadores del taller" onclick="abrirLightbox(this.src)">
+            <div class="carrusel-tag" style="background:rgba(34,197,94,.85)">Indicadores</div>
+          </div>
+          <div class="carrusel-body">
+            <div class="carrusel-titulo">KPIs del taller en tiempo real</div>
+            <div class="carrusel-desc">Disponibilidad, MTBF, MTTR, mantenimiento planificado, cumplimiento del preventivo, backlog y costos. Todo en tiempo real.</div>
+          </div>
         </div>
-        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
+
+        <div class="carrusel-item">
+          <div class="carrusel-img-wrap">
+            <img src="Imagenes/NOTIFICACIONES.png" alt="Correo automático del plan" onclick="abrirLightbox(this.src)">
+            <div class="carrusel-tag" style="background:rgba(34,197,94,.85)">Notificación</div>
+          </div>
+          <div class="carrusel-body">
+            <div class="carrusel-titulo">Notificación al cierre del plan</div>
+            <div class="carrusel-desc">Correo automático con detalle del plan. Llega al jefe de taller, a operaciones y a gerencia sin que nadie lo redacte.</div>
+          </div>
+        </div>
+
       </div>
 
-      <div class="evidencia-card">
-        <div class="evidencia-head">
-          <span class="evidencia-tag" style="background:rgba(129,140,248,.15);color:#a5b4fc;border:1px solid rgba(129,140,248,.3)">Planificación</span>
-          <span class="evidencia-tipo">Cola priorizada de OT</span>
-        </div>
-        <div class="evidencia-img">
-          <img src="Imagenes/Dashboard_Historial_Colas.png" alt="Historial de colas por prioridad" onclick="abrirLightbox(this.src)">
-        </div>
-        <div class="evidencia-body">
-          <p>Vista de planificación donde se ve la evolución de la cola a lo largo del turno, ordenada por prioridad (urgencias, fallas críticas, preventivos por vencer, preventivos dentro de ventana). Permite anticipar saturación.</p>
-        </div>
-        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
-      </div>
-
-      <div class="evidencia-card evidencia-wide">
-        <div class="evidencia-head">
-          <span class="evidencia-tag" style="background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)">Indicadores</span>
-          <span class="evidencia-tipo">KPIs del taller en tiempo real</span>
-        </div>
-        <div class="evidencia-img">
-          <img src="Imagenes/Dashboard_Indicadores_Taller.png" alt="Indicadores del taller" onclick="abrirLightbox(this.src)">
-        </div>
-        <div class="evidencia-body">
-          <p>Disponibilidad de equipos, MTBF, MTTR, mantenimiento planificado, cumplimiento del preventivo, backlog y costos. Los mismos KPIs que antes se consolidaban a mano al cierre del mes, ahora disponibles en tiempo real.</p>
-        </div>
-        <div class="evidencia-cta" onclick="abrirLightbox(this.previousElementSibling.previousElementSibling.querySelector('img').src)">🔍 Ver imagen ampliada</div>
-      </div>
+      <div class="carrusel-dots" id="carruselDotsJefe"></div>
     </div>
   </div>
 
@@ -1146,6 +1259,42 @@ function cerrarLightbox(){
   document.getElementById('lightbox').classList.remove('active');
   document.body.style.overflow = '';
 }
+function scrollCarrusel(direction, carruselId){
+  const c = carruselId ? document.getElementById(carruselId) : document.getElementById('carrusel');
+  if (!c) return;
+  const item = c.querySelector('.carrusel-item');
+  const step = item ? item.offsetWidth + 18 : 400;
+  c.scrollBy({ left: direction * step, behavior: 'smooth' });
+}
+function initCarrusel(carruselId, dotsId){
+  const carrusel = document.getElementById(carruselId);
+  const dotsContainer = document.getElementById(dotsId);
+  if (!carrusel || !dotsContainer) return;
+  const items = carrusel.querySelectorAll('.carrusel-item');
+  dotsContainer.innerHTML = '';
+  items.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'carrusel-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => {
+      items[i].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    };
+    dotsContainer.appendChild(dot);
+  });
+  carrusel.addEventListener('scroll', () => {
+    const scrollLeft = carrusel.scrollLeft;
+    const itemWidth = items[0].offsetWidth + 18;
+    const activeIndex = Math.round(scrollLeft / itemWidth);
+    dotsContainer.querySelectorAll('.carrusel-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === activeIndex);
+    });
+  });
+}
+function scrollCarruselJefe(direction){ scrollCarrusel(direction, 'carrusel-jefe'); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  initCarrusel('carrusel', 'carruselDots');
+  initCarrusel('carrusel-jefe', 'carruselDotsJefe');
+});
 document.addEventListener('keydown', e => { if(e.key==='Escape') cerrarLightbox(); });
 </script>
 
