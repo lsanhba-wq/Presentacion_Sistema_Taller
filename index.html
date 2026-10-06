@@ -106,7 +106,7 @@ tr:last-child td { border-bottom:none; }
 .mec-toggle .icon { font-size: 16px; font-weight: 400; transition: transform .25s; }
 .mec-card.expanded .mec-toggle .icon { transform: rotate(45deg); }
 .mec-detalle { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
-.mec-card.expanded .mec-detalle { max-height: 2000px; }
+.mec-card.expanded .mec-detalle { max-height: 3000px; }
 .mec-detalle-inner { padding: 16px 20px 20px; border-top: 1px solid var(--border); }
 .mec-bloque { margin-bottom: 14px; }
 .mec-bloque:last-child { margin-bottom: 0; }
@@ -121,10 +121,50 @@ tr:last-child td { border-bottom:none; }
 .mec-responsabilidad { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11px; color: var(--fg-dim); line-height: 1.65; }
 .mec-responsabilidad strong { color: var(--fg); }
 
-/* ── FLUJOGRAMA DE 7 ETAPAS (S-CURVE) ── */
-.flujo-wrap {
-  padding: 12px 0;
+/* Sub-capacidades dentro del Mecanismo 3 */
+.subcap {
+  background: rgba(0,0,0,.15);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-left: 3px solid var(--acc-glow);
 }
+.subcap:last-child { margin-bottom: 0; }
+.subcap-titulo {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.subcap-desc {
+  font-size: 11px;
+  color: var(--fg-muted);
+  line-height: 1.65;
+}
+.subcap-ejemplo {
+  font-size: 11px;
+  color: var(--acc-glow);
+  font-style: italic;
+  margin-top: 6px;
+  padding-left: 12px;
+  border-left: 2px solid rgba(59,130,246,.3);
+}
+
+.modalidad { background:var(--surface2); border-radius:10px; padding:22px; border-top:3px solid var(--acc); }
+.modalidad h4 { font-size:15px; font-weight:700; margin-bottom:10px; }
+.modalidad .tipo { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+.modalidad p { font-size:12px; color:var(--fg-muted); line-height:1.7; margin-bottom:14px; }
+.modalidad .comp-label { font-size:10px; font-weight:700; letter-spacing:.08em; margin-bottom:8px; }
+.modalidad ul { list-style:none; font-size:11px; color:var(--fg-muted); }
+.modalidad ul li { padding:5px 0; padding-left:14px; position:relative; line-height:1.55; }
+.modalidad ul li::before { content:'•'; position:absolute; left:0; color:var(--acc-glow); font-weight:700; }
+.modalidad .ideal { margin-top:16px; padding-top:12px; border-top:1px solid var(--border); font-size:11px; color:var(--fg-dim); }
+
+/* ── FLUJOGRAMA ── */
+.flujo-wrap { padding: 12px 0; }
 .flujo-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -156,52 +196,28 @@ tr:last-child td { border-bottom:none; }
   flex-direction: column;
   transition: transform .2s, box-shadow .2s, border-color .2s;
 }
-.flujo-etapa:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(0,0,0,.35);
-}
-.flujo-etapa .etapa-icono {
-  font-size: 26px;
-  margin-bottom: 10px;
-  line-height: 1;
-}
+.flujo-etapa:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.35); }
+.flujo-etapa .etapa-icono { font-size: 26px; margin-bottom: 10px; line-height: 1; }
 .flujo-etapa .etapa-numero {
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 14px; right: 16px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 11px; font-weight: 700;
   color: var(--fg-muted);
   letter-spacing: .06em;
 }
-.flujo-etapa .etapa-titulo {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--fg);
-}
-.flujo-etapa .etapa-desc {
-  font-size: 11px;
-  color: var(--fg-muted);
-  line-height: 1.65;
-}
-/* Flechas horizontales dentro de cada fila */
+.flujo-etapa .etapa-titulo { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--fg); }
+.flujo-etapa .etapa-desc { font-size: 11px; color: var(--fg-muted); line-height: 1.65; }
 .flujo-flecha {
   position: absolute;
-  top: 50%;
-  right: -16px;
+  top: 50%; right: -16px;
   transform: translateY(-50%);
   color: var(--fg-muted);
   font-size: 18px;
-  font-weight: 400;
   opacity: .6;
   pointer-events: none;
 }
-@media (max-width: 900px) {
-  .flujo-flecha { display: none; }
-}
-/* Bifurcación entre fila 1 y fila 2 */
+@media (max-width: 900px) { .flujo-flecha { display: none; } }
 .flujo-bajada {
   display: flex;
   justify-content: flex-end;
@@ -211,11 +227,7 @@ tr:last-child td { border-bottom:none; }
   font-size: 22px;
   opacity: .5;
 }
-@media (max-width: 900px) {
-  .flujo-bajada { display: none; }
-}
-
-/* Etapas con distinto color de acento (progresión visual) */
+@media (max-width: 900px) { .flujo-bajada { display: none; } }
 .flujo-etapa.e1 { border-top-color: #3b82f6; }
 .flujo-etapa.e2 { border-top-color: #4f7df5; }
 .flujo-etapa.e3 { border-top-color: #6366f1; }
@@ -224,15 +236,6 @@ tr:last-child td { border-bottom:none; }
 .flujo-etapa.e6 { border-top-color: #22c55e; }
 .flujo-etapa.e7 { border-top-color: #16a34a; }
 
-.modalidad { background:var(--surface2); border-radius:10px; padding:22px; border-top:3px solid var(--acc); }
-.modalidad h4 { font-size:15px; font-weight:700; margin-bottom:10px; }
-.modalidad .tipo { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
-.modalidad p { font-size:12px; color:var(--fg-muted); line-height:1.7; margin-bottom:14px; }
-.modalidad .comp-label { font-size:10px; font-weight:700; letter-spacing:.08em; margin-bottom:8px; }
-.modalidad ul { list-style:none; font-size:11px; color:var(--fg-muted); }
-.modalidad ul li { padding:5px 0; padding-left:14px; position:relative; line-height:1.55; }
-.modalidad ul li::before { content:'•'; position:absolute; left:0; color:var(--acc-glow); font-weight:700; }
-.modalidad .ideal { margin-top:16px; padding-top:12px; border-top:1px solid var(--border); font-size:11px; color:var(--fg-dim); }
 .cta-box { background:rgba(59,130,246,.06); border:1px solid rgba(59,130,246,.2); border-radius:12px; padding:24px; margin-top:20px; }
 .cta-box h3 { font-size:18px; font-weight:700; margin-bottom:10px; }
 .cta-box p { font-size:13px; color:var(--fg-dim); line-height:1.75; margin-bottom:16px; }
@@ -245,7 +248,7 @@ tr:last-child td { border-bottom:none; }
 .diff-card h5 { font-size:12px; font-weight:700; margin-bottom:6px; }
 .diff-card p { font-size:11px; color:var(--fg-muted); line-height:1.6; }
 
-/* ── GALERÍA DE EVIDENCIA ── */
+/* ── GALERÍA ── */
 .galeria-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:8px; }
 @media (max-width:900px){ .galeria-grid{grid-template-columns:1fr;} }
 .evidencia-card {
@@ -436,7 +439,7 @@ footer { text-align:center; padding:32px; color:var(--fg-muted); font-size:11px;
         <div class="mec-card-head">
           <div class="mec-num" style="color:#a855f7">Mecanismo 3</div>
           <h4>Agente IA de apoyo a decisiones</h4>
-          <div class="mec-resumen">Información inmediata en lenguaje natural, análisis What-If y KPIs bajo demanda.</div>
+          <div class="mec-resumen">Respuestas directas en lenguaje natural, simulación de escenarios y análisis retrospectivo de decisiones.</div>
         </div>
         <button class="mec-toggle" onclick="toggleMec(this)">
           <span>+ Ver detalle</span>
@@ -446,28 +449,45 @@ footer { text-align:center; padding:32px; color:var(--fg-muted); font-size:11px;
           <div class="mec-detalle-inner">
             <div class="mec-bloque">
               <div class="mec-bloque-label" style="color:var(--crit)">QUÉ RESUELVE</div>
-              <div class="mec-resuelve">Responder una pregunta de negocio hoy toma horas porque implica cruzar sistemas, planillas y datos dispersos. El gerente decide con información parcial o atrasada.</div>
+              <div class="mec-resuelve">Responder una pregunta de negocio hoy toma horas porque implica cruzar sistemas, planillas y datos dispersos. El gerente decide con información parcial o atrasada. Y cuando la pregunta requiere evaluar alternativas, no hay forma de hacerlo sin arriesgar la operación real.</div>
             </div>
             <div class="mec-bloque">
               <div class="mec-bloque-label" style="color:var(--ok)">QUÉ GANA · OPERACIONAL</div>
-              <ul class="mec-gana">
-                <li>Información inmediata y confiable, en lenguaje natural.</li>
-                <li>Análisis "¿qué pasa si…?" antes de decidir.</li>
-                <li>KPIs (MTBF, MTTR, disponibilidad) sin esperar cierre de mes.</li>
-                <li>Historial consultable de cada equipo y componente.</li>
-              </ul>
+              <div style="font-size:11px;color:var(--fg-muted);line-height:1.6;margin-bottom:10px">El agente clasifica la pregunta y responde según el tipo de decisión:</div>
+
+              <div class="subcap">
+                <div class="subcap-titulo"><span>💬</span><span>Respuestas directas</span></div>
+                <div class="subcap-desc">Estado del taller, historial por equipo, costos acumulados, KPIs (MTBF, MTTR, disponibilidad) en lenguaje natural.</div>
+                <div class="subcap-ejemplo">"¿Cuál es el MTTR del CAEX-08 este mes?"</div>
+              </div>
+
+              <div class="subcap">
+                <div class="subcap-titulo"><span>🔮</span><span>Simulación prospectiva — "¿qué pasa si…?"</span></div>
+                <div class="subcap-desc">Evaluación de cambios hacia adelante. El agente le pide precisar el escenario (carga, naves, fallas) y ejecuta una batería validada de corridas para entregar distribución de resultados, no una cifra aislada.</div>
+                <div class="subcap-ejemplo">"¿Qué pasa si agrego una nave? ¿Y si cambio la regla de priorización bajo carga alta?"</div>
+              </div>
+
+              <div class="subcap">
+                <div class="subcap-titulo"><span>⏪</span><span>Análisis retrospectivo — "¿qué habría pasado si…?"</span></div>
+                <div class="subcap-desc">Replay contrafactual sobre datos reales ya registrados. El agente toma los eventos reales de un período y los reproduce con una regla alternativa, comparando KPIs contra lo que efectivamente ocurrió.</div>
+                <div class="subcap-ejemplo">"¿Qué habría pasado si la semana pasada hubiese aplicado FIFO en vez de SPT?"</div>
+              </div>
+
+              <div style="font-size:11px;color:var(--fg-muted);line-height:1.65;margin-top:10px;padding:10px 12px;background:rgba(59,130,246,.06);border-radius:6px;border-left:2px solid var(--acc-glow)">
+                <strong style="color:var(--fg)">Sobre las simulaciones:</strong> el agente no improvisa. Cuando la pregunta es ambigua, solicita precisar el escenario y aplica una metodología de corridas calibrada por nuestro equipo. Usted recibe recomendación fundada en distribuciones de resultados.
+              </div>
             </div>
             <div class="mec-bloque">
               <div class="mec-bloque-label" style="color:var(--gold)">QUÉ GANA · ECONÓMICO</div>
               <ul class="mec-gana-eco">
-                <li>Menos horas gerenciales en buscar información.</li>
-                <li>Mejor calidad de decisión: datos actualizados, no estimaciones.</li>
-                <li>Menor riesgo de decisiones subóptimas.</li>
-                <li>Trazabilidad de decisiones para auditorías.</li>
+                <li>Menos horas gerenciales en buscar información y cruzarla manualmente.</li>
+                <li>Decisiones fundadas en distribuciones, no en estimaciones aisladas.</li>
+                <li>Reducción del riesgo de decisiones subóptimas, cuantificada antes de aprobar.</li>
+                <li>Trazabilidad completa de cada decisión y su justificación.</li>
               </ul>
             </div>
             <div class="mec-responsabilidad">
-              <strong>Responsabilidades que cubre:</strong> confiabilidad de activos · control presupuestario · liderazgo técnico.
+              <strong>Responsabilidades que cubre:</strong> confiabilidad de activos · control presupuestario · liderazgo técnico · evaluación de decisiones operacionales.
             </div>
           </div>
         </div>
@@ -682,7 +702,6 @@ footer { text-align:center; padding:32px; color:var(--fg-muted); font-size:11px;
 
     <div class="flujo-wrap">
 
-      <!-- Fila 1: etapas 1 a 4 -->
       <div class="flujo-row">
         <div class="flujo-etapa e1">
           <div class="etapa-icono">🔍</div>
@@ -713,10 +732,8 @@ footer { text-align:center; padding:32px; color:var(--fg-muted); font-size:11px;
         </div>
       </div>
 
-      <!-- Flecha de bajada -->
       <div class="flujo-bajada">↓</div>
 
-      <!-- Fila 2: etapas 5 a 7 (en reversa visual, pero mantiene el orden 5→6→7) -->
       <div class="flujo-row fila-2">
         <div class="flujo-etapa e5">
           <div class="etapa-icono">🎓</div>
@@ -925,7 +942,7 @@ footer { text-align:center; padding:32px; color:var(--fg-muted); font-size:11px;
         <div class="mec-card-head">
           <div class="mec-num" style="color:#a855f7">Mecanismo 3</div>
           <h4>Copiloto conversacional</h4>
-          <div class="mec-resumen">Pregúntele al agente en lenguaje natural y responde al instante con datos reales del taller.</div>
+          <div class="mec-resumen">Respuestas directas, simulación de escenarios y análisis retrospectivo, en lenguaje natural.</div>
         </div>
         <button class="mec-toggle" onclick="toggleMec(this)">
           <span>+ Ver detalle</span>
@@ -935,26 +952,39 @@ footer { text-align:center; padding:32px; color:var(--fg-muted); font-size:11px;
           <div class="mec-detalle-inner">
             <div class="mec-bloque">
               <div class="mec-bloque-label" style="color:var(--crit)">QUÉ RESUELVE</div>
-              <div class="mec-resuelve">Buscar un dato en el ERP, cruzarlo con planillas, o esperar al cierre de mes para tener un KPI consolidado.</div>
+              <div class="mec-resuelve">Buscar un dato en el ERP, cruzarlo con planillas, o esperar al cierre de mes para tener un KPI consolidado. Y cuando usted duda si una decisión fue la correcta, no tiene manera de comprobarlo.</div>
             </div>
             <div class="mec-bloque">
               <div class="mec-bloque-label" style="color:var(--ok)">QUÉ GANA USTED</div>
-              <ul class="mec-gana">
-                <li>Le pregunta al agente y responde al instante.</li>
-                <li>Puede preguntar "¿qué pasa si…?" antes de comprometer un cambio.</li>
-                <li>Historial de cualquier equipo disponible en segundos.</li>
-              </ul>
+
+              <div class="subcap">
+                <div class="subcap-titulo"><span>💬</span><span>Respuestas directas</span></div>
+                <div class="subcap-desc">Estado del taller, historial de equipos, costos, KPIs (MTBF, MTTR, disponibilidad) al instante.</div>
+                <div class="subcap-ejemplo">"¿Cuántas OT tiene la Nave 1 ahora?"</div>
+              </div>
+
+              <div class="subcap">
+                <div class="subcap-titulo"><span>🔮</span><span>Simulación prospectiva — "¿qué pasa si…?"</span></div>
+                <div class="subcap-desc">Antes de comprometer un cambio, el agente evalúa el impacto en escenarios controlados. Si la pregunta es ambigua, le pide precisar carga, naves y fallas.</div>
+                <div class="subcap-ejemplo">"¿Qué pasa si postergo el PM del CAEX-07 dos días?"</div>
+              </div>
+
+              <div class="subcap">
+                <div class="subcap-titulo"><span>⏪</span><span>Análisis retrospectivo — "¿qué habría pasado si…?"</span></div>
+                <div class="subcap-desc">Al cierre del turno, el agente puede comparar lo que hizo contra lo que habría pasado con otra decisión. Sobre datos reales, sin inventar.</div>
+                <div class="subcap-ejemplo">"¿Qué habría pasado si hubiese priorizado distinto la OT del CAEX-03 anoche?"</div>
+              </div>
             </div>
             <div class="mec-bloque">
               <div class="mec-bloque-label" style="color:var(--gold)">QUÉ AHORRA EN TIEMPO Y ESFUERZO</div>
               <ul class="mec-gana-eco">
                 <li>Deja de pedir datos por WhatsApp a otras áreas.</li>
-                <li>Deja de esperar reportes de fin de mes.</li>
-                <li>Menos tiempo en reuniones para aclarar el estado real.</li>
+                <li>Deja de esperar reportes de fin de mes para saber cómo va el taller.</li>
+                <li>Deja de reconstruir el turno anterior cuando alguien pregunta qué pasó.</li>
               </ul>
             </div>
             <div class="mec-responsabilidad">
-              <strong>Responsabilidad suya que cubre:</strong> supervisión técnica y respuesta ante urgencias.
+              <strong>Responsabilidad suya que cubre:</strong> supervisión técnica y respuesta ante urgencias · evaluación de decisiones de turno.
             </div>
           </div>
         </div>
